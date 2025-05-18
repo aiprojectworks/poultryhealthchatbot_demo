@@ -7,6 +7,9 @@ import openai
 import base64
 import json
 
+import sys
+sys.path.append('./')
+
 client = OpenAI()  # Uses OPENAI_API_KEY from environment
 
 # Database setup
