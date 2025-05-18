@@ -66,6 +66,7 @@ hyperframe==6.1.0
 idna==3.10
 importlib_metadata==8.6.1
 importlib_resources==6.5.2
+instructor==1.7.9
 ipython==9.2.0
 ipython_pygments_lexers==1.1.1
 jedi==0.19.2
@@ -135,6 +136,7 @@ posthog==3.25.0
 prompt_toolkit==3.0.51
 propcache==0.3.1
 protobuf==5.29.4
+psycopg2==2.9.10
 pure_eval==0.2.3
 pyarrow==20.0.0
 pyasn1==0.6.1
@@ -155,7 +157,10 @@ pyright==1.1.400
 pysbd==0.3.4
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
-python-telegram-bot==22.1
+python-telegram-bot==22.0
+pytube==15.0.0
+pytz==2024.2
+pyvis==0.3.2
 pywin32==310
 PyYAML==6.0.2
 qdrant-client==1.14.2
