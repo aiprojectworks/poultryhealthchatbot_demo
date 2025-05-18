@@ -156,7 +156,6 @@ pysbd==0.3.4
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
 python-telegram-bot==22.0
-pytube
 pywin32==310
 PyYAML==6.0.2
 qdrant-client==1.14.2
