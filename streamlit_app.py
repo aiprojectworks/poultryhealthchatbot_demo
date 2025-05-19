@@ -1,7 +1,7 @@
 import streamlit as st
 import sqlite3
 from datetime import datetime
-from TestText2SQLAgent import sql_dev, extract_data, Crew, Process, data_analyst, analyze_data, data_insert_validator, validate_insert_data, alert_agent,alert_task
+from myagent import sql_dev, extract_data, Crew, Process, data_analyst, analyze_data, data_insert_validator, validate_insert_data, alert_agent,alert_task
 from openai import OpenAI
 import openai
 import base64
