@@ -178,7 +178,7 @@ elif menu == "Database Query":
 
 elif menu == "Poultry Health Update":
     st.header("Poultry Health Data Update")
-    Initialize session state for record_found and form fields
+    # Initialize session state for record_found and form fields
     if "record_found" not in st.session_state:
         st.session_state.record_found = False
     if "update_fields" not in st.session_state:
