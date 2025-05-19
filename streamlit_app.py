@@ -175,88 +175,88 @@ elif menu == "Database Query":
 elif menu == "Poultry Health Update":
     st.header("Poultry Health Data Update")
     # Initialize session state for record_found and form fields
-    if "record_found" not in st.session_state:
-        st.session_state.record_found = False
-    if "update_fields" not in st.session_state:
-        st.session_state.update_fields = {}
+    # if "record_found" not in st.session_state:
+    #     st.session_state.record_found = False
+    # if "update_fields" not in st.session_state:
+    #     st.session_state.update_fields = {}
 
-    with st.form("health_update_form"):
-        record_id = st.number_input("Enter Record ID to Update", min_value=1, step=1)
-        fetch_btn = st.form_submit_button("Fetch Record")
+    # with st.form("health_update_form"):
+    #     record_id = st.number_input("Enter Record ID to Update", min_value=1, step=1)
+    #     fetch_btn = st.form_submit_button("Fetch Record")
 
-        if fetch_btn:
-            # Fetch the record from the database
-            conn = sqlite3.connect('poultry_health.db')
-            c = conn.cursor()
-            c.execute("SELECT body_weight, body_temperature, vaccination_records, symptoms, image_analysis FROM poultry_health_records WHERE id=?", (record_id,))
-            row = c.fetchone()
-            conn.close()
-            if row:
-                st.session_state.record_found = True
-                st.session_state.update_fields = {
-                    "body_weight": row[0],
-                    "body_temp": row[1],
-                    "vaccines": row[2],
-                    "symptoms": row[3],
-                    "image_analysis": row[4]
-                }
-                st.success("Record found. You can now update the fields below.")
-            else:
-                st.session_state.record_found = False
-                st.session_state.update_fields = {}
-                st.error("Record not found. Please check the ID.")
+    #     if fetch_btn:
+    #         # Fetch the record from the database
+    #         conn = sqlite3.connect('poultry_health.db')
+    #         c = conn.cursor()
+    #         c.execute("SELECT body_weight, body_temperature, vaccination_records, symptoms, image_analysis FROM poultry_health_records WHERE id=?", (record_id,))
+    #         row = c.fetchone()
+    #         conn.close()
+    #         if row:
+    #             st.session_state.record_found = True
+    #             st.session_state.update_fields = {
+    #                 "body_weight": row[0],
+    #                 "body_temp": row[1],
+    #                 "vaccines": row[2],
+    #                 "symptoms": row[3],
+    #                 "image_analysis": row[4]
+    #             }
+    #             st.success("Record found. You can now update the fields below.")
+    #         else:
+    #             st.session_state.record_found = False
+    #             st.session_state.update_fields = {}
+    #             st.error("Record not found. Please check the ID.")
 
-        # Only display the update form if a record was found
-        if st.session_state.record_found:
-            update_fields = st.session_state.update_fields
-            new_body_weight = st.number_input("Body Weight (kg)", min_value=0.0, value=update_fields.get("body_weight", 0.0), key="update_weight")
-            new_body_temp = st.number_input("Body Temperature (°C)", min_value=0.0, value=update_fields.get("body_temp", 0.0), key="update_temp")
-            new_vaccines = st.text_input("Vaccination Records", value=update_fields.get("vaccines", ""), key="update_vaccines")
-            new_symptoms = st.text_input("Symptoms", value=update_fields.get("symptoms", ""), key="update_symptoms")
-            uploaded_image = st.file_uploader("Upload New Image (optional)", type=["jpg", "jpeg", "png"], key="update_image")
-            new_image_analysis = update_fields.get("image_analysis", "")
+    #     # Only display the update form if a record was found
+    #     if st.session_state.record_found:
+    #         update_fields = st.session_state.update_fields
+    #         new_body_weight = st.number_input("Body Weight (kg)", min_value=0.0, value=update_fields.get("body_weight", 0.0), key="update_weight")
+    #         new_body_temp = st.number_input("Body Temperature (°C)", min_value=0.0, value=update_fields.get("body_temp", 0.0), key="update_temp")
+    #         new_vaccines = st.text_input("Vaccination Records", value=update_fields.get("vaccines", ""), key="update_vaccines")
+    #         new_symptoms = st.text_input("Symptoms", value=update_fields.get("symptoms", ""), key="update_symptoms")
+    #         uploaded_image = st.file_uploader("Upload New Image (optional)", type=["jpg", "jpeg", "png"], key="update_image")
+    #         new_image_analysis = update_fields.get("image_analysis", "")
 
-            if uploaded_image is not None:
-                st.image(uploaded_image, caption="Uploaded Image", use_column_width=True)
-                image_bytes = uploaded_image.read()
-                image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-                prompt = "Describe what you see in this poultry health image."
-                response = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "system", "content": "You are an expert poultry farm assistant. Describe the content of the uploaded image for health analysis."},
-                        {"role": "user", "content": [
-                            {"type": "text", "text": prompt},
-                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
-                        ]}
-                    ],
-                    max_tokens=256
-                )
-                new_image_analysis = response.choices[0].message.content
-                st.info(f"Image Analysis: {new_image_analysis}")
+    #         if uploaded_image is not None:
+    #             st.image(uploaded_image, caption="Uploaded Image", use_column_width=True)
+    #             image_bytes = uploaded_image.read()
+    #             image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+    #             prompt = "Describe what you see in this poultry health image."
+    #             response = client.chat.completions.create(
+    #                 model="gpt-4o",
+    #                 messages=[
+    #                     {"role": "system", "content": "You are an expert poultry farm assistant. Describe the content of the uploaded image for health analysis."},
+    #                     {"role": "user", "content": [
+    #                         {"type": "text", "text": prompt},
+    #                         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
+    #                     ]}
+    #                 ],
+    #                 max_tokens=256
+    #             )
+    #             new_image_analysis = response.choices[0].message.content
+    #             st.info(f"Image Analysis: {new_image_analysis}")
 
-            update_btn = st.form_submit_button("Update Record")
-            if update_btn:
-                # Use Crew agent to construct and execute the UPDATE query
-                query_prompt = f"""
-                UPDATE poultry_health_records
-                SET body_weight={new_body_weight},
-                    body_temperature={new_body_temp},
-                    vaccination_records='{new_vaccines}',
-                    symptoms='{new_symptoms}',
-                    image_analysis='{new_image_analysis}'
-                WHERE id={record_id};
-                """
-                crew = Crew(
-                    agents=[sql_dev, data_insert_validator],
-                    tasks=[extract_data, validate_insert_data],
-                    process=Process.sequential,
-                    verbose=True,
-                    memory=False,
-                    output_log_file="crew.log",
-                )
-                inputs = {"query": query_prompt}
-                result = crew.kickoff(inputs=inputs)
-                st.success("Record updated successfully!")
-                st.write("Query Result:")
-                st.code(result)
+    #         update_btn = st.form_submit_button("Update Record")
+    #         if update_btn:
+    #             # Use Crew agent to construct and execute the UPDATE query
+    #             query_prompt = f"""
+    #             UPDATE poultry_health_records
+    #             SET body_weight={new_body_weight},
+    #                 body_temperature={new_body_temp},
+    #                 vaccination_records='{new_vaccines}',
+    #                 symptoms='{new_symptoms}',
+    #                 image_analysis='{new_image_analysis}'
+    #             WHERE id={record_id};
+    #             """
+    #             crew = Crew(
+    #                 agents=[sql_dev, data_insert_validator],
+    #                 tasks=[extract_data, validate_insert_data],
+    #                 process=Process.sequential,
+    #                 verbose=True,
+    #                 memory=False,
+    #                 output_log_file="crew.log",
+    #             )
+    #             inputs = {"query": query_prompt}
+    #             result = crew.kickoff(inputs=inputs)
+    #             st.success("Record updated successfully!")
+    #             st.write("Query Result:")
+    #             st.code(result)
