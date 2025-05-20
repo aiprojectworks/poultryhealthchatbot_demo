@@ -10,9 +10,23 @@ from openai import OpenAI
 import openai
 import base64
 import json
+import psycopg2
+from dotenv import load_dotenv
+import os
 
 import sys
 sys.path.append('./')
+
+# Load environment variables from .env
+load_dotenv()
+
+# Fetch variables
+USER = os.getenv("user")
+PASSWORD = os.getenv("password")
+HOST = os.getenv("host")
+PORT = os.getenv("port")
+DBNAME = os.getenv("dbname")
+
 
 client = OpenAI()  # Uses OPENAI_API_KEY from environment
 
@@ -190,11 +204,41 @@ elif menu == "Poultry Health Update":
 
         if fetch_btn:
             # Fetch the record from the database
-            conn = sqlite3.connect('poultry_health.db')
-            c = conn.cursor()
-            c.execute("SELECT body_weight, body_temperature, vaccination_records, symptoms, image_analysis FROM poultry_health_records WHERE id=?", (record_id,))
-            row = c.fetchone()
-            conn.close()
+            #SQLite3 code
+            # conn = sqlite3.connect('poultry_health.db')
+            # c = conn.cursor()
+            # c.execute("SELECT body_weight, body_temperature, vaccination_records, symptoms, image_analysis FROM poultry_health_records WHERE id=?", (record_id,))
+            # row = c.fetchone()
+            # conn.close()
+            # if row:
+            #     st.session_state.record_found = True
+            #     st.session_state.update_fields = {
+            #         "body_weight": row[0],
+            #         "body_temp": row[1],
+            #         "vaccines": row[2],
+            #         "symptoms": row[3],
+            #         "image_analysis": row[4]
+            #     }
+            #     st.success("Record found. You can now update the fields below.")
+            #Supabase codes
+            connection = psycopg2.connect(
+                        user=USER,
+                        password=PASSWORD,
+                        host=HOST,
+                        port=PORT,
+                        dbname=DBNAME
+                    )
+
+            print("Connection successful!")
+            # Create a cursor to execute SQL queries
+            cursor = connection.cursor()
+    
+            cursor.execute("SELECT body_weight, body_temperature, vaccination_records, symptoms, image_analysis FROM poultry_health_records WHERE id = " + str(record_id))
+            row = cursor.fetchone()
+            # Close the cursor and connection
+            cursor.close()
+            connection.close()
+            print("Connection closed.")
             if row:
                 st.session_state.record_found = True
                 st.session_state.update_fields = {
@@ -204,7 +248,8 @@ elif menu == "Poultry Health Update":
                     "symptoms": row[3],
                     "image_analysis": row[4]
                 }
-                st.success("Record found. You can now update the fields below.")
+                st.success("Record found. You can now update the fields below.")          
+   
             else:
                 st.session_state.record_found = False
                 st.session_state.update_fields = {}
