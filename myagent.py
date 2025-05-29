@@ -46,7 +46,7 @@ GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 SUPABASE_API_KEY= st.secrets["SUPABASE_API_KEY"]
 TELEGRAM_TESTUSER_ID= st.secrets["TELEGRAM_TESTUSER_ID"]
-
+TELEGRAM_TOKEN = st.secrets["TELEGRAM_TOKEN"]
 
 
 # Step 3. Load Data and Save to SQLite Database
