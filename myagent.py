@@ -4,7 +4,7 @@
 
 import json
 import os
-# import sqlite3
+import sqlite3
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -37,16 +37,24 @@ import os
 from dotenv import load_dotenv
 
 
+# TOKEN = "8116010104:AAGKeSQx7PGYUWoZ3T5_JWB7w5eq3hA-sZk"
+# chat_id = '1961419857'
 
 load_dotenv()
-# os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
+
 os.environ["CREWAI_TELEMETRY_DISABLED"] = "1"
 
+# GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+# TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# SUPABASE_API_KEY= os.getenv("SUPABASE_API_KEY")
+# TELEGRAM_TESTUSER_ID= os.getenv("TELEGRAM_TESTUSER_ID")
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 SUPABASE_API_KEY= st.secrets["SUPABASE_API_KEY"]
 TELEGRAM_TESTUSER_ID= st.secrets["TELEGRAM_TESTUSER_ID"]
 TELEGRAM_TOKEN = st.secrets["TELEGRAM_TOKEN"]
+
 
 
 # Step 3. Load Data and Save to SQLite Database
@@ -260,7 +268,23 @@ data_insert_validator = Agent(
     allow_delegation=False,
 )
 
-
+# Agent 4: Data Json Validation Agent
+data_json_validator = Agent(
+    role="Data Json Validation Agent",
+    goal="Validate that all mandatory data/fields in the provided json for SQL insert is provided",
+    backstory=dedent(
+        """
+        You good in understanding JSON structure and extracting data from JSON.
+        You are responsible for ensuring data integrity before any SQL insert operation.
+        Your job is to check that all mandatory fields from the user form stored in json are present and not missing.
+        You can check the JSON structure and validate value are not empty in all mandatory fields.
+        All mandatory fields' value should not be empty.
+        If any mandatory field is missing, you must report which one and why.
+        """
+    ),
+    llm=llm,
+    allow_delegation=False,
+)
 
 
 # Step 8. Create Tasks
@@ -309,6 +333,58 @@ validate_insert_data = Task(
     expected_output="Validation pass or fail with reason",
     agent=data_insert_validator,
     # context=[extract_data],  # Optionally, you can pass the extract_data task as context if needed
+)
+
+# Task: Validate Json Data
+validate_json_data = Task(
+    description=dedent(
+        """
+        Check that all mandatory key from the user form stored as JSON {query} for SQL insert is provided and no data is missing.
+        If any mandatory field's VALUE is missing, report which one and why.
+        The objective is to ensure all mandatory data are complete before insertion.
+        If any mandatory field is missing, you must report was fail with reason. 
+        And all mandatory fields' value are present you must report as pass.
+        """
+    ),
+    expected_output="Validation result pass or fail with reason",
+    agent=data_json_validator,
+    # context=[extract_data],  # Optionally, you can pass the extract_data task as context if needed
+)
+
+# Task : Get data required from Json form to INSERT database
+store_data = Task(
+
+    description=dedent(
+        """
+        Extract Json data relate to the table for the query {query}.
+        Check that all mandatory field are filled with data , set the complete_status field with True.
+        Check if any mandatory field's VALUE is missing, set the complete_status field with False.
+        Irregardless of complete_status's value, insert the record with the Json data from the user form.
+        """
+    ),
+    agent=sql_dev,
+    expected_output=(
+        "For SELECT queries: Return a list of JSON objects, where each object represents a record with field names as keys and their corresponding values.\n"
+        "For other SQL queries (INSERT, UPDATE, DELETE, etc.): Return a JSON object with a 'message' field indicating the result (e.g., success, error, or affected rows)."
+    ),
+)
+
+# Task : Get data required from Json form to UDPATE database
+update_data = Task(
+
+    description=dedent(
+        """
+        Extract Json data relate to the table for the query {query}.
+        Check that all mandatory field are filled with data , set the complete_status field with True.
+        Check if any mandatory field's VALUE is missing, set the complete_status field with False.
+        Irregardless of complete_status's value, Update the record based on given value in case_id.
+        """
+    ),
+    agent=sql_dev,
+    expected_output=(
+        "For SELECT queries: Return a list of JSON objects, where each object represents a record with field names as keys and their corresponding values.\n"
+        "For other SQL queries (INSERT, UPDATE, DELETE, etc.): Return a JSON object with a 'message' field indicating the result (e.g., success, error, or affected rows)."
+    ),
 )
 
 # Step 9. Setup The Crew
@@ -409,6 +485,13 @@ alert_task = Task(
     agent=alert_agent,
     expected_output="Alert sent or notification logged based on validation outcome.",
     context=[validate_insert_data],
+)
+
+alert_json_task = Task(
+    description="Send an alert or notification based on the validation result.",
+    agent=alert_agent,
+    expected_output="Alert sent or notification logged based on validation outcome.",
+    context=[validate_json_data],
 )
 
 # Example Task for Alert Agent
